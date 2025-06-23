@@ -1,5 +1,6 @@
 package com.likelion.junseoungbin_new.member.domain;
 
+import com.likelion.junseoungbin_new.member.api.dto.request.MemberUpdateRequestDto;
 import com.likelion.junseoungbin_new.post.domain.Post;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -22,6 +23,7 @@ public class Member {
 
     @Column(name = "member_email", nullable = false)
     private String email;
+
     private String password;
 
     @Column(name = "member_name", nullable = false)
@@ -46,4 +48,8 @@ public class Member {
         this.role = role;
     }
 
+    public void update(MemberUpdateRequestDto dto) {
+        this.nickname = dto.nickname();
+        this.age = dto.age();
+    }
 }

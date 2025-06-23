@@ -1,7 +1,6 @@
 package com.likelion.junseoungbin_new.member.application;
 
 import java.util.List;
-
 import com.likelion.junseoungbin_new.member.api.dto.request.MemberSaveRequestDto;
 import com.likelion.junseoungbin_new.member.api.dto.request.MemberUpdateRequestDto;
 import com.likelion.junseoungbin_new.member.api.dto.response.MemberInfoResponseDto;
@@ -40,23 +39,26 @@ public class MemberService {
 
     // 단일 사용자 조회
     public MemberInfoResponseDto memberFindOne(Long memberId) {
-        Member member = memberRepository
-                .findById(memberId)
-                .orElseThrow(IllegalArgumentException::new);
+        Member member = findMemberById(memberId);
         return MemberInfoResponseDto.from(member);
     }
 
     // 사용자 정보 수정
     @Transactional
     public void memberUpdate(Long memberId, MemberUpdateRequestDto memberUpdateRequestDto) {
-        Member member = memberRepository.findById(memberId).orElseThrow(IllegalArgumentException::new);
+        Member member = findMemberById(memberId);
         member.update(memberUpdateRequestDto);
     }
 
     // 사용자 정보 삭제
     @Transactional
     public void memberDelete(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(IllegalArgumentException::new);
+        Member member = findMemberById(memberId);
         memberRepository.delete(member);
+    }
+
+    private Member findMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 사용자를 찾을 수 없습니다. ID: " + memberId));
     }
 }
