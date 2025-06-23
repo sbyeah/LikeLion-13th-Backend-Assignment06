@@ -1,86 +1,28 @@
 package com.likelion.junseoungbin_new.common.error;
 
-import com.likelion.junseoungbin_new.common.error.ErrorCode;
-import com.likelion.junseoungbin_new.common.exception.BusinessException;
-import com.likelion.junseoungbin_new.member.domain.Member;
-import com.likelion.junseoungbin_new.member.domain.repository.MemberRepository;
-import com.likelion.junseoungbin_new.post.api.dto.request.PostSaveRequestDto;
-import com.likelion.junseoungbin_new.post.api.dto.request.PostUpdateRequestDto;
-import com.likelion.junseoungbin_new.post.api.dto.response.PostInfoResponseDto;
-import com.likelion.junseoungbin_new.post.api.dto.response.PostListResponseDto;
-import com.likelion.junseoungbin_new.post.domain.Post;
-import com.likelion.junseoungbin_new.post.domain.repository.PostRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.security.Principal;
-import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
-@Service
-@RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class PostService {
-    private final MemberRepository memberRepository;
-    private final PostRepository postRepository;
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public enum ErrorCode {
 
-    // 게시물 저장
-    @Transactional
-    public void postSave(PostSaveRequestDto postSaveRequestDto, Principal principal) {
-        Long memberId = Long.parseLong(principal.getName());
+    NO_AUTHORIZATION_EXCEPTION(HttpStatus.UNAUTHORIZED, "권한이 없습니다.", "NO_AUTHORIZATION_401"),
 
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND_EXCEPTION,
-                        ErrorCode.MEMBER_NOT_FOUND_EXCEPTION.getMessage()));
+    MEMBER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 사용자가 없습니다. memberId = ", "NOT_FOUND_404"),
+    POST_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 게시글이 없습니다. postId = ", "NOT_FOUND_404"),
 
-        Post post = Post.builder()
-                .title(postSaveRequestDto.title())
-                .content(postSaveRequestDto.content())
-                .member(member)
-                .build();
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 서버 에러가 발생했습니다", "INTERNAL_SERVER_ERROR_500"),
 
-        postRepository.save(post);
-    }
+    VALIDATION_EXCEPTION(HttpStatus.BAD_REQUEST, "유효성 검사에 실패하였습니다.", "BAD_REQUEST_400");
 
-    // 전체 게시글 조회
-    public PostListResponseDto postFindAll() {
-        List<Post> posts = postRepository.findAll();
-        List<PostInfoResponseDto> postInfoResponseDtos = posts.stream()
-                .map(PostInfoResponseDto::from)
-                .toList();
+    private final HttpStatus httpStatus;
+    private final String message;
+    private final String code;
 
-        return PostListResponseDto.from(postInfoResponseDtos);
-    }
-
-    // 특정 작성자가 작성한 게시글 목록을 조회
-    public PostListResponseDto postFindMember(Principal principal) {
-        Long memberId = Long.parseLong(principal.getName());
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND_EXCEPTION,
-                        ErrorCode.MEMBER_NOT_FOUND_EXCEPTION.getMessage()));
-
-        List<Post> posts = postRepository.findByMember(member);
-        List<PostInfoResponseDto> postInfoResponseDtos = posts.stream()
-                .map(PostInfoResponseDto::from)
-                .toList();
-
-        return PostListResponseDto.from(postInfoResponseDtos);
-    }
-
-    // 게시물 수정
-    @Transactional
-    public void postUpdate(Long postId, PostUpdateRequestDto postUpdateRequestDto) {
-        Post post = postRepository.findById(postId).orElseThrow(() ->
-                new BusinessException(ErrorCode.POST_NOT_FOUND_EXCEPTION,
-                        ErrorCode.POST_NOT_FOUND_EXCEPTION.getMessage() + postId));
-        post.update(postUpdateRequestDto);
-    }
-
-    // 게시물 삭제
-    @Transactional
-    public void postDelete(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() ->
-                new BusinessException(ErrorCode.POST_NOT_FOUND_EXCEPTION,
-                        ErrorCode.POST_NOT_FOUND_EXCEPTION.getMessage() + postId));
-        postRepository.delete(post);
+    public int getHttpStatusCode() {
+        return httpStatus.value();
     }
 }

@@ -1,7 +1,6 @@
 package com.likelion.junseoungbin_new.common.exception;
 
 import com.likelion.junseoungbin_new.common.error.ErrorCode;
-import com.likelion.junseoungbin_new.common.exception.BusinessException;
 import com.likelion.junseoungbin_new.common.template.ApiResTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

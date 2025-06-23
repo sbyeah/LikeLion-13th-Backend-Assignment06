@@ -13,7 +13,6 @@ import com.likelion.junseoungbin_new.post.domain.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.security.Principal;
 import java.util.List;
 
@@ -30,8 +29,8 @@ public class PostService {
         Long memberId = Long.parseLong(principal.getName());
 
         Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND_EXCEPTION
-                        , ErrorCode.MEMBER_NOT_FOUND_EXCEPTION.getMessage()));
+                () -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.MEMBER_NOT_FOUND_EXCEPTION.getMessage()));
 
         Post post = Post.builder()
                 .title(postSaveRequestDto.title())
@@ -56,8 +55,8 @@ public class PostService {
     public PostListResponseDto postFindMember(Principal principal) {
         Long memberId = Long.parseLong(principal.getName());
         Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND_EXCEPTION
-                        , ErrorCode.MEMBER_NOT_FOUND_EXCEPTION.getMessage()));
+                () -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.MEMBER_NOT_FOUND_EXCEPTION.getMessage()));
 
         List<Post> posts = postRepository.findByMember(member);
         List<PostInfoResponseDto> postInfoResponseDtos = posts.stream()
@@ -69,16 +68,19 @@ public class PostService {
 
     // 게시물 수정
     @Transactional
-    public void postUpdate(Long postId, PostUpdateRequestDto postUpdateRequestDto)
-    {
-        Post post = postRepository.findById(postId).orElseThrow(IllegalArgumentException::new);
+    public void postUpdate(Long postId, PostUpdateRequestDto postUpdateRequestDto) {
+        Post post = postRepository.findById(postId).orElseThrow(() ->
+                new BusinessException(ErrorCode.POST_NOT_FOUND_EXCEPTION,
+                        ErrorCode.POST_NOT_FOUND_EXCEPTION.getMessage() + postId));
         post.update(postUpdateRequestDto);
     }
 
     // 게시물 삭제
     @Transactional
     public void postDelete(Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(IllegalArgumentException::new);
+        Post post = postRepository.findById(postId).orElseThrow(() ->
+                new BusinessException(ErrorCode.POST_NOT_FOUND_EXCEPTION,
+                        ErrorCode.POST_NOT_FOUND_EXCEPTION.getMessage() + postId));
         postRepository.delete(post);
     }
 }
